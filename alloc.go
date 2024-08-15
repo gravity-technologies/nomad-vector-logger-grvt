@@ -113,20 +113,25 @@ func (app *App) generateConfig(allocs map[string]*api.Allocation) error {
 	for _, alloc := range allocs {
 		// Add metadata for each task in the alloc.
 
-		// current deployment strategy using s3 artifacts to identify workload release version
-		// put s3 name to releaseId to identity version of workload
-		var releaseId *string
-		if len(alloc.Job.TaskGroups) > 0 {
-			taskGroup := alloc.Job.TaskGroups[0]
-			if len(taskGroup.Tasks) > 0 {
-				task := taskGroup.Tasks[0]
-				if len(task.Artifacts) > 0 {
-					releaseId = task.Artifacts[0].GetterSource
+		for task := range alloc.TaskResources {
+			// current deployment strategy using s3 artifacts to identify workload release version
+			// put s3 name to releaseId to identity version of workload
+			var releaseId *string
+			var releaseIdStr = "default"
+			if len(alloc.Job.TaskGroups) > 0 {
+				taskGroup := alloc.Job.TaskGroups[0]
+				if len(taskGroup.Tasks) > 0 {
+					for _, taskObject := range taskGroup.Tasks {
+						if taskObject.Name == task && len(taskObject.Artifacts) > 0 {
+							releaseId = taskObject.Artifacts[0].GetterSource
+						}
+					}
 				}
 			}
-		}
+			if releaseId != nil {
+				releaseIdStr = *releaseId
+			}
 
-		for task := range alloc.TaskResources {
 			// Add task to the data.
 			data = append(data, AllocMeta{
 				Key:       fmt.Sprintf("nomad_alloc_%s_%s", alloc.ID, task),
@@ -137,7 +142,7 @@ func (app *App) generateConfig(allocs map[string]*api.Allocation) error {
 				Node:      alloc.NodeName,
 				Task:      task,
 				Job:       alloc.JobID,
-				ReleaseId: *releaseId,
+				ReleaseId: releaseIdStr,
 			})
 		}
 	}
