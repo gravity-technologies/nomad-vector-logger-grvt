@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/hashicorp/nomad/api"
@@ -129,7 +130,7 @@ func (app *App) generateConfig(allocs map[string]*api.Allocation) error {
 				}
 			}
 			if releaseId != nil {
-				releaseIdStr = *releaseId
+				releaseIdStr = strings.Replace(*releaseId, "s3://grvt-binary.s3.ap-northeast-1.amazonaws.com/", "", -1)
 			}
 
 			// Add task to the data.
