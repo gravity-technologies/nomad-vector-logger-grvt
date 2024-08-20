@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/hashicorp/nomad/api"
@@ -112,7 +113,26 @@ func (app *App) generateConfig(allocs map[string]*api.Allocation) error {
 	// Iterate on allocs in the map.
 	for _, alloc := range allocs {
 		// Add metadata for each task in the alloc.
+
 		for task := range alloc.TaskResources {
+			// current deployment strategy using s3 artifacts to identify workload release version
+			// put s3 name to releaseId to identity version of workload
+			var releaseId *string
+			var releaseIdStr = "default"
+			if len(alloc.Job.TaskGroups) > 0 {
+				taskGroup := alloc.Job.TaskGroups[0]
+				if len(taskGroup.Tasks) > 0 {
+					for _, taskObject := range taskGroup.Tasks {
+						if taskObject.Name == task && len(taskObject.Artifacts) > 0 {
+							releaseId = taskObject.Artifacts[0].GetterSource
+						}
+					}
+				}
+			}
+			if releaseId != nil {
+				releaseIdStr = strings.Replace(*releaseId, "s3://grvt-binary.s3.ap-northeast-1.amazonaws.com/", "", -1)
+			}
+
 			// Add task to the data.
 			data = append(data, AllocMeta{
 				Key:       fmt.Sprintf("nomad_alloc_%s_%s", alloc.ID, task),
@@ -123,6 +143,7 @@ func (app *App) generateConfig(allocs map[string]*api.Allocation) error {
 				Node:      alloc.NodeName,
 				Task:      task,
 				Job:       alloc.JobID,
+				ReleaseId: releaseIdStr,
 			})
 		}
 	}
