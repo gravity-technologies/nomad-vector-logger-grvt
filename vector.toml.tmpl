@@ -3,6 +3,7 @@
 type = "file"
 include = [ "{{$value.LogDir}}" ]
 line_delimiter = "\n"
+max_line_bytes = 2048_00
 read_from = "beginning"
 [transforms.transform_{{$value.Key}}]
 type = "remap"
