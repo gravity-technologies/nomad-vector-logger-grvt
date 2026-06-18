@@ -7,7 +7,7 @@ BUILDSTR := ${VERSION} (Commit: ${LAST_COMMIT_DATE} (${LAST_COMMIT}), Build: $(s
 
 .PHONY: build
 build: ## Build binary.
-	go build -o ${APP-BIN} -ldflags="-X 'main.buildString=${BUILDSTR}'"
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ${APP-BIN} -ldflags="-X 'main.buildString=${BUILDSTR}'"
 
 .PHONY: run
 run: ## Run binary.
@@ -18,7 +18,7 @@ fresh: build run
 
 .PHONY: lint
 lint:
-	docker run --rm -v $(pwd):/app -w /app golangci/golangci-lint:latest golangci-lint run -v
+	docker run --rm -v $(shell pwd):/app -w /app golangci/golangci-lint:latest golangci-lint run -v
 
 .PHONY: dev
 dev:

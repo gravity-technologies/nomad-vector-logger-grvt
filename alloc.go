@@ -130,7 +130,7 @@ func (app *App) generateConfig(allocs map[string]*api.Allocation) error {
 				}
 			}
 			if releaseId != nil {
-				releaseIdStr = strings.Replace(*releaseId, "s3://grvt-binary.s3.ap-northeast-1.amazonaws.com/", "", -1)
+				releaseIdStr = strings.ReplaceAll(*releaseId, "s3://grvt-binary.s3.ap-northeast-1.amazonaws.com/", "")
 			}
 
 			// Add task to the data.
