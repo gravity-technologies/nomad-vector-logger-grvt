@@ -5,6 +5,7 @@ include = [ "{{$value.LogDir}}" ]
 line_delimiter = "\n"
 max_line_bytes = 2048_00
 read_from = "beginning"
+fingerprint.strategy = "device_and_inode"
 [transforms.transform_{{$value.Key}}]
 type = "remap"
 inputs = ["source_{{$value.Key}}"]
